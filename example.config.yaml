@@ -1,0 +1,4 @@
+appid: "<你的BotAppID>"
+token: "<你的Token>"
+baiduapi: "<你的百度NLP的appid>"
+baidusecret: "<你的百度NLP的token>"
