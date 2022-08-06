@@ -73,6 +73,45 @@ class BaiduClient(botpy.Client):
             else:
                 await message.reply(content=f"您的消息：\n「{msg}」\n没有问题。")
 
+class nonBaiduClient(botpy.Client):
+    async def on_ready(self):
+        # print("Bot is ready")
+        _log.info(f"机器人「{self.robot.name}」正在运行中")
+
+    # member message fetch
+    async def on_message_create(self, message: Message):
+        # _log.info(message.author.avatar)
+        msg = message.content
+        member = message.member
+        _log.info(msg)
+
+        # 角色处理
+        if member.roles == NoneType:
+            pass
+        elif "4" in member.roles:
+            # 不处理频道主消息
+            return 0
+        elif "2" in member.roles:
+            # 不处理管理员消息
+            return 0
+        elif "5" in member.roles:
+            # 不处理子管理员消息
+            return 0
+
+        # 处理消息，去除符号
+        msg_remove_at = re.sub(r'<[^>]+>', "", msg)  # 去除@信息
+        msg_remove = re.sub(r"[\s\w，。《》？【】！“”‘’：；,\./?!@#$%^&*\(\)\\]+", "", msg_remove_at)
+        msg_remove = re.sub(r"((&lt;)|(&gt;))+", "", msg_remove)
+        msg_no_ascii = re.sub(r"[\s\w]+", "", msg_remove_at)
+
+        _log.info(msg_remove)
+        length = len(msg_remove)
+        for taboo in taboo_list:
+            if taboo in msg_no_ascii:
+                short_msg = msg if len(msg)<=14 else msg[0:7]+"…"+msg[-7:]
+                await message.reply(content=f"您的消息：\n「{short_msg}」\n包含违禁词，请注意语言文明。\n如有误判，请联系频道子管理")
+                return 0
+
 
 # main program
 if __name__ == "__main__":
@@ -102,5 +141,5 @@ if __name__ == "__main__":
         # 机器人主体程序
         intents = botpy.Intents(
             public_guild_messages=True, guild_messages=True)
-        mybot = BaiduClient(intents=intents)
+        mybot = nonBaiduClient(intents=intents)
         mybot.run(appid=test_config["appid"], token=test_config["token"])
